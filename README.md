@@ -9,7 +9,7 @@ AI-powered Product Synthesizer that automatically ingests and processes  public 
 |------------------|---------------|--------------------------------------------------------------------------|
 | Jeslyn Chang    | @se1yu | x        |
 | Leslie Tejeda Peña | @LTejeda2006     |x |
-| Brianna Ikwuemesi    | @x  |x              |
+| Brianna Ikwuemesi    | @xCBriannaI  |x              |
 | Purnoor Sharma     | @noorps     | x |
 | Rahel Ayele      | @x    |x           |
 
