@@ -1,0 +1,36 @@
+CREATE OR REPLACE VIEW `sprinternship-aus-2026.gcp_updates.release_notes_clean` AS
+SELECT
+  row_id,
+  product_name,
+  release_note_type,
+  published_at,
+  -- Re-evaluated on every read, so it degrades correctly as notes age.
+  CASE
+    WHEN DATE(published_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 DAY)
+      THEN source_url
+    ELSE 'https://docs.cloud.google.com/release-notes/all'
+  END AS source_url,
+  -- Strip links entirely (keep the anchor text), then all remaining tags,
+  -- then decode entities.
+  TRIM(REGEXP_REPLACE(
+    REGEXP_REPLACE(
+      REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(
+            REGEXP_REPLACE(description, r'(?is)<a[^>]*>(.*?)</a>', r'\1'),
+            r'(?i)<br\s*/?>|</p>|</li>|</h[1-6]>|</div>', '\n'),
+          r'<[^>]*>', ''),
+        r'&nbsp;|&#160;', ' '),
+      r'&lt;|&gt;|&quot;|&#39;|&amp;', ' '),
+    r'\n{3,}', '\n\n')) AS description,
+  -- Standalone text for indexing: carries its own context so a search for
+  CONCAT(
+    product_name, ' (', release_note_type, ', ',
+    FORMAT_DATE('%B %d, %Y', DATE(published_at)), '): ',
+    TRIM(REGEXP_REPLACE(
+      REGEXP_REPLACE(
+        REGEXP_REPLACE(description, r'(?is)<a[^>]*>(.*?)</a>', r'\1'),
+        r'<[^>]*>', ''),
+      r'&nbsp;|\s{2,}', ' '))
+  ) AS embedding_text
+FROM `sprinternship-aus-2026.gcp_updates.release_notes`;
