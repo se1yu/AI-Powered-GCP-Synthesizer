@@ -1,0 +1,22 @@
+[project]
+name = "pulse-release-agent"
+version = "1.0.0"
+description = "Pulse — GCP Release Notes & Service Health assistant for Google TAMs."
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 95
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# theme.py/ui.py embed compact single-line CSS rules for readability —
+# wrapping each declaration would make the stylesheet harder to scan.
+"release_agent/theme.py" = ["E501"]
+"release_agent/ui.py" = ["E501"]
+
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]

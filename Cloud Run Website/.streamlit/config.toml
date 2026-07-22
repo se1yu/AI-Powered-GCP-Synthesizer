@@ -1,0 +1,21 @@
+# Pulse — Material 3 theme (Google blue baseline, light).
+# Dark mode is handled by Streamlit's built-in theme toggle; base="light"
+# here just sets the default. See docs/ARCHITECTURE.md for the full M3
+# color-role mapping used across app.py and pages/.
+
+[theme]
+base = "light"
+primaryColor = "#0B57D0"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F4F9"
+textColor = "#1F1F1F"
+font = "sans serif"
+
+[server]
+enableXsrfProtection = true
+enableCORS = true
+maxUploadSize = 5
+
+
+[browser]
+gatherUsageStats = false
