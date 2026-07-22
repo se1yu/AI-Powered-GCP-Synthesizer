@@ -1,4 +1,4 @@
-"""Material 3 Expressive design system for Pulse.
+"""Material 3 Expressive design system for Cloud Comms.
 
 All tokens below are sourced from Google's live M3 specification (pulled
 via Firecrawl MCP, July 2026): m3.material.io/styles/{color,elevation,
@@ -90,6 +90,11 @@ GLOBAL_CSS = """<style>
     --pulse-outline: #747775;
     --pulse-outline-variant: #C4C7C5;
 
+    /* ── Brand gradient (per team Figma: yellow -> blue wash) ─────────── */
+    --pulse-brand-yellow: #FBBC05;
+    --pulse-brand-blue: #3C84FC;
+    --pulse-grey-inactive: #D7D9DA;
+
     /* ── Shape scale ─────────────────────────────────────────────────── */
     --pulse-shape-xs: 4px;
     --pulse-shape-sm: 8px;
@@ -168,7 +173,7 @@ GLOBAL_CSS = """<style>
   .pulse-appbar .pulse-logo-badge {
       width: 40px; height: 40px;
       border-radius: var(--pulse-shape-lg);
-      background: var(--pulse-primary-container);
+      background: linear-gradient(135deg, rgba(251, 188, 5, 0.35), rgba(60, 132, 252, 0.35));
       color: var(--pulse-on-primary-container);
       display: flex; align-items: center; justify-content: center;
       font-size: 22px;
@@ -198,26 +203,34 @@ GLOBAL_CSS = """<style>
   .pulse-card:hover { background: var(--pulse-surface-container); }
 
   .pulse-hero {
-      background: linear-gradient(135deg, var(--pulse-primary-container) 0%, var(--pulse-tertiary-container) 100%);
-      border-radius: var(--pulse-shape-xl);
-      padding: var(--pulse-space-8) var(--pulse-space-6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      padding: var(--pulse-space-8) var(--pulse-space-6) var(--pulse-space-6);
       margin: var(--pulse-space-4) 0;
       animation: pulse-fade-in var(--pulse-duration-long) var(--pulse-ease-emphasized);
   }
-  .pulse-hero .pulse-hero-icon {
-      font-size: 48px;
-      color: var(--pulse-on-primary-container);
+  .pulse-hero .pulse-hero-subtext {
+      font-family: "Google Sans", sans-serif;
+      font-weight: 300;
+      font-size: clamp(16px, 1.6vw, 22px);
+      letter-spacing: -0.2px;
+      color: var(--pulse-on-surface-variant);
+      margin: 0 0 var(--pulse-space-4) 0;
+  }
+  .pulse-hero .pulse-hero-logo {
+      max-width: min(420px, 80%);
+      width: 100%;
+      height: auto;
       margin-bottom: var(--pulse-space-2);
   }
-  .pulse-hero h2 {
-      font-family: "Google Sans", sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      color: var(--pulse-on-primary-container);
-      margin: 0 0 4px 0;
+  .pulse-hero p.pulse-hero-caption {
+      color: var(--pulse-on-surface-variant);
+      font-size: 13px;
+      margin: var(--pulse-space-2) 0 0 0;
   }
-  .pulse-hero p { color: var(--pulse-on-tertiary-container); font-size: 13px; margin: 0; }
 
   @keyframes pulse-fade-in {
       from { opacity: 0; transform: translateY(8px); }
@@ -285,9 +298,9 @@ GLOBAL_CSS = """<style>
       30% { transform: translateY(-6px); opacity: 1; }
   }
 
-  /* ── Sidebar / nav-rail styling ───────────────────────────────────── */
+  /* ── Sidebar / nav-rail styling (Figma: yellow -> blue wash) ──────── */
   section[data-testid="stSidebar"] {
-      background: var(--pulse-surface-container-low);
+      background: linear-gradient(180deg, rgba(251, 188, 5, 0.35) 0%, rgba(60, 132, 252, 0.35) 100%);
       border-right: 1px solid var(--pulse-outline-variant);
   }
 
@@ -298,12 +311,33 @@ GLOBAL_CSS = """<style>
       animation: pulse-fade-in var(--pulse-duration-medium) var(--pulse-ease-emphasized);
   }
 
-  /* ── Buttons: expressive shape + spring hover ────────────────────── */
+  /* ── Buttons: Figma "dashboard-button" pill treatment ─────────────── */
   .stButton > button, .stDownloadButton > button {
       border-radius: var(--pulse-shape-full) !important;
-      transition: transform var(--pulse-duration-short) var(--pulse-ease-spring) !important;
+      border: 2px solid var(--pulse-grey-inactive) !important;
+      background: #FFFFFF !important;
+      color: #333333 !important;
+      font-weight: 600 !important;
+      transition: transform var(--pulse-duration-short) var(--pulse-ease-spring) !important,
+                  background var(--pulse-duration-short) var(--pulse-ease-standard) !important;
   }
-  .stButton > button:hover, .stDownloadButton > button:hover { transform: scale(1.02); }
+  .stButton > button:hover, .stDownloadButton > button:hover {
+      background: #F0F3FF !important;
+      transform: translateY(-2px);
+  }
+
+  /* ── Chat input: rounded search-bar treatment ─────────────────────── */
+  div[data-testid="stChatInput"] {
+      border-radius: var(--pulse-shape-full) !important;
+  }
+  div[data-testid="stChatInput"] textarea {
+      border-radius: var(--pulse-shape-full) !important;
+  }
+  div[data-testid="stChatInputContainer"] {
+      border-radius: var(--pulse-shape-full) !important;
+      border: 1.5px solid var(--pulse-grey-inactive) !important;
+      background: #FFFFFF !important;
+  }
 
   .pulse-empty { text-align: center; padding: var(--pulse-space-8) 0; opacity: 0.7; }
   .pulse-empty .pulse-empty-icon { font-size: 44px; }

@@ -1,8 +1,8 @@
-"""Pulse: the GCP Release & Service Health agent for Google TAMs.
+"""Cloud Comms: the GCP Release & Service Health agent for Google TAMs.
 
 This module wires the ADK Agent to the data-access layer in sources.py
 (Single Responsibility: agent.py owns persona + orchestration only, never
-raw I/O). Pulse blends three signal types when answering:
+raw I/O). Cloud Comms blends three signal types when answering:
   1. Structured RAG — parameterized BigQuery lookups over release notes.
   2. Semantic RAG — Vertex AI Search over the same corpus (fuzzy queries).
   3. Live signal — GCP Service Health incidents (is something down *now*).
@@ -10,7 +10,7 @@ raw I/O). Pulse blends three signal types when answering:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from google.adk.agents.llm_agent import Agent
 from google.cloud import discoveryengine_v1 as discoveryengine
@@ -103,10 +103,10 @@ def search_release_notes_semantic(query: str, num_results: int = 5) -> dict:
         return {"status": "error", "message": str(exc)}
 
 
-_TODAY = datetime.now(UTC).strftime("%Y-%m-%d")
+_TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 _INSTRUCTION = f"""
-You are Pulse, the GCP Release & Service Health assistant built for Google
+You are Cloud Comms, the GCP Release & Service Health assistant built for Google
 Technical Account Managers (TAMs). You help TAMs stay ahead of what's
 changing across Google Cloud — and whether anything is broken right now —
 without digging through release note pages themselves.
@@ -154,8 +154,8 @@ Today's date: {_TODAY}
 
 root_agent = Agent(
     model=SETTINGS.model,
-    name="pulse_agent",
-    description="Pulse — GCP Release Notes & Service Health assistant for Google TAMs.",
+    name="cloud_comms_agent",
+    description="Cloud Comms — GCP Release Notes & Service Health assistant for Google TAMs.",
     instruction=_INSTRUCTION,
     tools=[
         search_release_notes,

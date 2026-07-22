@@ -1,4 +1,4 @@
-"""Data access layer for Pulse: BigQuery release notes + GCP Service Health.
+"""Data access layer for Cloud Comms: BigQuery release notes + GCP Service Health.
 
 Single Responsibility: this module owns all I/O to external data sources.
 The ADK agent (agent.py) and UI (ui/*) never talk to BigQuery or HTTP

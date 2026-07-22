@@ -1,4 +1,4 @@
-"""Reusable Material 3 Expressive rendering helpers for Pulse's pages.
+"""Reusable Material 3 Expressive rendering helpers for Cloud Comms' pages.
 
 Single Responsibility: this module only renders — it never fetches data
 or holds state. Keeping presentation separate from app.py's orchestration
@@ -7,23 +7,57 @@ keeps both files small and independently testable.
 
 from __future__ import annotations
 
+import base64
+from pathlib import Path
+
 import streamlit as st
 
 from release_agent.theme import badge_class, severity_class
 
+_GRAPHICS_DIR = Path(__file__).resolve().parent.parent / "graphics"
+_LOGO_PATH = _GRAPHICS_DIR / "CloudComms_Logo.svg"
+_ICON_PATH = _GRAPHICS_DIR / "CloudComms_Icon.svg"
 
-def render_appbar(title: str, subtitle: str, icon: str = "\U0001f4e1") -> None:
-    """Renders the Pulse M3 Expressive top app bar (icon badge + title).
 
-    Uses a native Unicode emoji rather than an icon web font: emoji render
-    reliably offline/behind restrictive networks with zero external font
-    request, avoiding the ligature-text-leak failure mode of web icon
-    fonts when the font request is blocked or slow to load.
+@st.cache_resource
+def _logo_data_uri() -> str:
+    """Base64-encodes the team's CloudComms wordmark logo for inline embedding.
+
+    Streamlit doesn't serve arbitrary repo files as static assets by default,
+    so the SVG is inlined as a data URI rather than referenced by path.
     """
+    encoded = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
+    return f"data:image/svg+xml;base64,{encoded}"
+
+
+@st.cache_resource
+def _icon_data_uri() -> str:
+    """Base64-encodes the CloudComms icon mark for inline embedding in raw HTML.
+
+    Used by render_appbar's badge, which is hand-rolled HTML rather than a
+    native st.image call, so it needs the same data-URI treatment as the
+    wordmark logo above rather than Streamlit's built-in SVG-path support.
+    """
+    encoded = base64.b64encode(_ICON_PATH.read_bytes()).decode("ascii")
+    return f"data:image/svg+xml;base64,{encoded}"
+
+
+def render_appbar(title: str, subtitle: str, icon: str | None = None) -> None:
+    """Renders the Cloud Comms M3 Expressive top app bar (icon badge + title).
+
+    icon defaults to the CloudComms icon mark; pass a plain emoji string
+    (e.g. "\U0001f4ca") to use that instead, for pages that want a
+    different glyph than the brand icon.
+    """
+    icon_html = (
+        f'<img src="{_icon_data_uri()}" alt="" style="width:100%;height:100%;object-fit:contain;" />'
+        if icon is None
+        else icon
+    )
     st.markdown(
         f"""
         <div class="pulse-appbar">
-            <div class="pulse-logo-badge">{icon}</div>
+            <div class="pulse-logo-badge">{icon_html}</div>
             <div>
                 <h1>{title}</h1>
                 <p>{subtitle}</p>
@@ -34,19 +68,20 @@ def render_appbar(title: str, subtitle: str, icon: str = "\U0001f4e1") -> None:
     )
 
 
-def render_hero_empty_state(icon: str, title: str, subtitle: str) -> None:
-    """Renders the M3 Expressive "hero moment" empty state for a fresh chat.
+def render_hero_empty_state(title: str, subtitle: str) -> None:
+    """Renders the CloudComms "hero moment" header: tagline, wordmark, caption.
 
-    Per M3 Expressive guidance: use 1-2 hero moments per product to make a
-    stand-alone, editorial statement. The chat's blank-slate state is the
-    natural hero moment for Pulse.
+    Mirrors the team's Figma mockup: a light tagline above the CloudComms
+    wordmark logo, with the fuller description as a small caption below.
+    Called on every render (not just the blank-slate state) so the brand
+    logo persists at the top of the page throughout the conversation.
     """
     st.markdown(
         f"""
         <div class="pulse-hero">
-            <div class="pulse-hero-icon">{icon}</div>
-            <h2>{title}</h2>
-            <p>{subtitle}</p>
+            <p class="pulse-hero-subtext">{title}</p>
+            <img class="pulse-hero-logo" src="{_logo_data_uri()}" alt="CloudComms logo" />
+            <p class="pulse-hero-caption">{subtitle}</p>
         </div>
         """,
         unsafe_allow_html=True,

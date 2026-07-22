@@ -1,6 +1,6 @@
-# Pulse — GCP Release & Service Health Assistant
+# Cloud Comms — GCP Release & Service Health Assistant
 
-Pulse is a Streamlit chat assistant for Google Technical Account Managers
+Cloud Comms is a Streamlit chat assistant for Google Technical Account Managers
 (TAMs). It answers questions about Google Cloud release notes and live
 service health in plain, well-formatted language, backed by BigQuery,
 Vertex AI Search, and the public GCP Service Health feed.
@@ -21,7 +21,7 @@ Vertex AI Search, and the public GCP Service Health feed.
    cp .env.example release_agent/.env
    ```
 
-1. Authenticate to GCP locally (Pulse uses Application Default
+1. Authenticate to GCP locally (Cloud Comms uses Application Default
    Credentials):
 
    ```bash
@@ -45,7 +45,7 @@ See [Quick start](#quick-start). Production dependencies are pinned in
 
 ## Usage
 
-Ask Pulse things like:
+Ask Cloud Comms things like:
 
 - "What new features dropped in Vertex AI this week?"
 - "Is BigQuery having any issues right now?"
@@ -64,7 +64,7 @@ design, data flow, and RAG strategy, and
 
 ## Deployment
 
-Pulse deploys to Cloud Run via buildpacks (no Dockerfile needed) using
+Cloud Comms deploys to Cloud Run via buildpacks (no Dockerfile needed) using
 the `Procfile`:
 
 ```bash

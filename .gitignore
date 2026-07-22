@@ -1,0 +1,18 @@
+# Virtual environments — several of these exist scattered across this repo
+# (.venv/, venv/ at root, Cloud Run Website/venv/); none should ever be
+# committed. A bare "venv/" pattern here matches at any depth, so this one
+# file covers all of them.
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Secrets / local config — never commit real values (see .env.example)
+.env
+*.env
+!.env.example
+
+# Streamlit
+.streamlit/secrets.toml

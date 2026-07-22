@@ -1,4 +1,4 @@
-"""Centralized configuration for the Pulse release agent.
+"""Centralized configuration for the Cloud Comms release agent.
 
 Single source of truth for GCP resource identifiers, model name, and
 tunables. A frozen dataclass enforces immutability-by-default; every value
@@ -43,7 +43,7 @@ RELEASE_TYPES: tuple[str, ...] = (
 
 @dataclass(frozen=True)
 class Settings:
-    """Immutable runtime configuration for Pulse.
+    """Immutable runtime configuration for Cloud Comms.
 
     Attributes:
         project: GCP project ID hosting BigQuery + Vertex AI resources.

@@ -1,4 +1,4 @@
-"""Pulse — the GCP Release & Service Health agent package."""
+"""Cloud Comms — the GCP Release & Service Health agent package."""
 
 __version__ = "1.0.0"
 

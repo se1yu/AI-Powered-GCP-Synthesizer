@@ -1,4 +1,4 @@
-"""Pulse — GCP Release & Service Health assistant for Google TAMs.
+"""Cloud Comms — GCP Release & Service Health assistant for Google TAMs.
 
 Run with: streamlit run app.py
 
@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -33,6 +34,11 @@ from release_agent.ui import (
 )
 
 load_dotenv("release_agent/.env")
+
+# Streamlit's page_icon/chat avatar both accept a local SVG file path
+# natively (image_to_url inlines it as a data URI) — no manual base64
+# needed here, unlike the hand-rolled HTML in ui.py's render_appbar badge.
+_ASSISTANT_ICON = str(Path(__file__).resolve().parent / "graphics" / "CloudComms_Icon.svg")
 
 _PRODUCT_OPTIONS = (
     "Cloud Run",
@@ -57,12 +63,14 @@ _EXAMPLE_PROMPTS = (
 )
 
 st.set_page_config(
-    page_title="Pulse — GCP Release Assistant", page_icon="\U0001f4e1", layout="wide"
+    page_title="Cloud Comms — GCP Release Assistant", page_icon=_ASSISTANT_ICON, layout="wide"
 )
-# st.html() (not st.markdown+unsafe_allow_html) renders raw HTML/CSS in an
-# isolated context, avoiding CommonMark HTML-block edge cases (e.g. a
-# multi-line <style> block can otherwise leak as visible text).
-st.html(GLOBAL_CSS)
+# st.html() sandboxes its content (Streamlit renders it in an isolated
+# context, similar to an iframe), so CSS placed there can't reach anything
+# outside itself — sidebar, buttons, chat input never saw GLOBAL_CSS.
+# st.markdown+unsafe_allow_html renders in the main document instead, so
+# the <style> block applies page-wide like a normal stylesheet.
+st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 
 def _init_session_state() -> None:
@@ -103,8 +111,8 @@ async def _stream_agent_response(query: str):
     """Yields incremental text chunks from the ADK runner for st.write_stream.
 
     Streaming (rather than waiting for the full response) removes the long
-    blank-spinner wait the original UI had and lets Pulse's answer render
-    progressively, matching modern chat UX expectations.
+    blank-spinner wait the original UI had and lets Cloud Comms' answer
+    render progressively, matching modern chat UX expectations.
 
     Fail-fast principle applied defensively: any exception from the model
     or tool layer (auth, quota, unavailable model, network) is caught here
@@ -132,10 +140,10 @@ async def _stream_agent_response(query: str):
             if new_chunk:
                 yield new_chunk
     except Exception as exc:  # noqa: BLE001 - surface a safe message, never a raw traceback
-        logging.getLogger(__name__).exception("Pulse agent turn failed")
+        logging.getLogger(__name__).exception("Cloud Comms agent turn failed")
         detail = str(exc)[:200]
         yield (
-            "\u26a0\ufe0f Pulse hit an error reaching the model or a data source. "
+            "\u26a0\ufe0f Cloud Comms hit an error reaching the model or a data source. "
             f"Please try again in a moment, or rephrase your question.\n\n"
             f"`{detail}`"
         )
@@ -152,7 +160,7 @@ def _render_sidebar() -> str | None:
     prefill: str | None = None
 
     with st.sidebar:
-        render_appbar("Pulse", "GCP Release & Health Assistant", icon="\U0001f4e1")
+        render_appbar("Cloud Comms", "GCP Release & Health Assistant")
 
         st.markdown("**Live status**")
         health = fetch_service_health(active_only=True)
@@ -200,18 +208,22 @@ def _render_sidebar() -> str | None:
 
 
 def _render_history() -> None:
-    """Renders prior chat turns using native st.chat_message (proper markdown)."""
-    if not st.session_state["messages"]:
-        render_hero_empty_state(
-            "\U0001f4e1",
-            "Ask Pulse about GCP release notes or live status",
-            "Structured + semantic search across every Google Cloud product",
-        )
+    """Renders the CloudComms header, then prior chat turns (native st.chat_message).
 
+    The header (tagline + wordmark logo + caption) renders unconditionally
+    so the brand logo persists at the top of the page throughout the
+    conversation, not just on the pristine, no-messages-yet state.
+    """
+    render_hero_empty_state(
+        "Ask Comms about GCP release notes or live status",
+        "Assistance on reliablly searching across every Google Cloud product",
+    )
+
+    if not st.session_state["messages"]:
         return
 
     for i, msg in enumerate(st.session_state["messages"]):
-        avatar = "\U0001f9d1\u200d\U0001f4bb" if msg["role"] == "user" else "\U0001f4e1"
+        avatar = "\U0001f9d1\u200d\U0001f4bb" if msg["role"] == "user" else _ASSISTANT_ICON
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
             if msg["role"] == "assistant":
@@ -234,7 +246,7 @@ def _consume_deep_link_query() -> str | None:
     """Reads a `?q=` deep-link query param once, then clears it.
 
     Lets TAMs share a link like `?q=Any+breaking+changes+in+Cloud+Run`
-    that pre-fills and auto-asks Pulse a question.
+    that pre-fills and auto-asks Cloud Comms a question.
     """
     query_value = st.query_params.get("q")
     if query_value:
@@ -244,14 +256,12 @@ def _consume_deep_link_query() -> str | None:
 
 
 def main() -> None:
-    """Entry point: renders the Pulse chat page."""
+    """Entry point: renders the Cloud Comms chat page."""
     _init_session_state()
     prefill = _render_sidebar()
     deep_link_query = _consume_deep_link_query()
 
-    render_appbar(
-        "Pulse", "GCP Release Notes & Service Health, for Google TAMs", icon="\U0001f4e1"
-    )
+    render_appbar("Cloud Comms", "GCP Release Notes & Service Health, for Google TAMs")
 
     # Fail-fast, once: verify the configured model is actually reachable
     # before letting a TAM type a question into a broken chat. Previously
@@ -279,7 +289,7 @@ def main() -> None:
         st.markdown(query)
 
     with (
-        st.chat_message("assistant", avatar="\U0001f4e1"),
+        st.chat_message("assistant", avatar=_ASSISTANT_ICON),
         st.spinner("Checking release notes and live status..."),
     ):
         response = st.write_stream(_stream_agent_response(query))

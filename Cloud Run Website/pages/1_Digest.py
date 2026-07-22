@@ -1,4 +1,4 @@
-"""Pulse — Weekly Digest page.
+"""Cloud Comms — Weekly Digest page.
 
 A multipage Streamlit app page (native st.navigation pattern via the
 pages/ directory) giving TAMs a scannable, chart-backed summary instead of
@@ -14,8 +14,8 @@ from release_agent.sources import fetch_service_health, get_recent_summary
 from release_agent.theme import GLOBAL_CSS
 from release_agent.ui import render_appbar, render_incident_banner
 
-st.set_page_config(page_title="Pulse — Weekly Digest", page_icon="\U0001f4ca", layout="wide")
-st.html(GLOBAL_CSS)
+st.set_page_config(page_title="Cloud Comms — Weekly Digest", page_icon="\U0001f4ca", layout="wide")
+st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 
 render_appbar(
@@ -72,7 +72,7 @@ with col_metrics:
         st.download_button(
             "Export CSV",
             data=csv_bytes,
-            file_name=f"pulse_digest_{days_back}d.csv",
+            file_name=f"cloudcomms_digest_{days_back}d.csv",
             mime="text/csv",
             icon="\U0001f4e5",
         )

@@ -1,0 +1,14 @@
+# Secrets / local config — never commit real values (see .env.example)
+.env
+release_agent/.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from release_agent.config import SETTINGS
 from release_agent.sources import get_bigquery_client
@@ -22,7 +22,7 @@ def record_feedback(session_id: str, question: str, answer: str, rating: int) ->
     Args:
         session_id: The chat session this feedback belongs to.
         question: The user's question.
-        answer: Pulse's answer being rated.
+        answer: Cloud Comms' answer being rated.
         rating: -1 (thumbs down), 0 (neutral), or 1 (thumbs up).
 
     Returns:
@@ -34,7 +34,7 @@ def record_feedback(session_id: str, question: str, answer: str, rating: int) ->
         "question": question,
         "answer": answer,
         "rating": rating,
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     try:
         errors = get_bigquery_client().insert_rows_json(
