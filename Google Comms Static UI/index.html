@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <!-- Wrapper container holding everything -->
+  <div class="app-container">
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <button class="dashboard-button active" data-view="view-home">Dashboard</button>
+      <button class="dashboard-button" data-view="view-askcomms">Ask Comms</button>
+      <button class="dashboard-button" data-view="view-recs">Recommendations</button>
+      <button class="dashboard-button" data-view="view-subscribe">Subscribe</button>
+      <button class="new-chat-btn">+ New Chat</button>
+      <div class="selected-client" id="selected-client"></div>
+    </aside>
+
+    <!-- Right Main Chat Area -->
+    <main class="chat-container">
+
+      <!-- View: Home -->
+      <section class="view view-home active" id="view-home">
+        <div class="logo-comms-wrapper">
+          <div class="logo-group">
+            <img src="icon.svg" class="logo-g" alt="G Icon">
+            <img src="oicon.svg" class="logo-o" alt="O Icon">
+            <img src="ooicon.svg" class="logo-o" alt="O Icon">
+            <img src="gicon.svg" class="logo-gg" alt="G Icon">
+            <img src="licon.svg" class="logo-l" alt="L Icon">
+            <img src="eicon.svg" class="logo-e" alt="E Icon">
+          </div>
+
+          <h1 class="comms-text">
+            <span class="c-blue">C</span><!--
+         --><span class="o-red">o</span><!--
+         --><span class="m-yellow">m</span><!--
+         --><span class="m-green">m</span><!--
+         --><span class="s-green">s</span>
+          </h1>
+
+          <img src="images/cloud-logo.png" class="logo-cloud" alt="Google Cloud">
+    </div>
+    <div class="subtext-under-logo">Stay updated in the cloud...</div>
+
+    <!-- Client selector -->
+    <div class="client-dropdown" id="client-dropdown">
+      <div class="client-select" id="client-select">
+        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 169 158" fill="none">
+          <path d="M42.165 58.9473L84.33 98.2455L126.495 58.9473" stroke="currentColor" stroke-width="14.055" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <input id="client-input" type="text" placeholder="Choose your client" autocomplete="off" />
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <ul class="dropdown-menu" id="dropdown-menu" role="listbox"></ul>
+    </div>
+  </section>
+
+  <!-- View: Ask Comms -->
+  <section class="view view-askcomms" id="view-askcomms">
+    <!-- Empty state: logo + tagline, hidden once a conversation starts -->
+    <div class="ask-empty-state" id="ask-empty-state">
+      <div class="logo-comms-wrapper">
+        <div class="logo-group">
+          <img src="icon.svg" class="logo-g" alt="G Icon">
+          <img src="oicon.svg" class="logo-o" alt="O Icon">
+          <img src="ooicon.svg" class="logo-o" alt="O Icon">
+          <img src="gicon.svg" class="logo-gg" alt="G Icon">
+          <img src="licon.svg" class="logo-l" alt="L Icon">
+          <img src="eicon.svg" class="logo-e" alt="E Icon">
+        </div>
+
+        <h1 class="comms-text">
+          <span class="c-blue">C</span><!--
+       --><span class="o-red">o</span><!--
+       --><span class="m-yellow">m</span><!--
+       --><span class="m-green">m</span><!--
+       --><span class="s-green">s</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Chat transcript — empty until the first message, then scrolls -->
+    <div class="chat-history" id="chat-history"></div>
+
+    <!-- Input Bar -->
+    <div class="client-select ask-input-bar" id="ask-input-bar">
+      <svg class="chevron" viewBox="0 0 169 158" fill="none">
+        <path d="M42.165 58.9473L84.33 98.2455L126.495 58.9473" stroke="currentColor" stroke-width="14.055" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <input id="ask-input" type="text" placeholder="What can I help you with today?" autocomplete="off" />
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+
+    <!-- Suggestions — hidden once a conversation starts -->
+    <div class="ask-empty-state" id="ask-suggestions">
+      <div class="suggest-heading">Suggestions on what to ask our AI</div>
+      <div class="suggest-row">
+        <button class="suggest-pill">Latest updates in the cloud</button>
+        <button class="suggest-pill">Show today's service announcements</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- View: Recommendations -->
+  <section class="view view-recs" id="view-recs">
+    <div class="recs-header">
+      <h2 class="recs-title">Product Update Frequency</h2>
+      <p class="subtext-under-logo">Visualization of GCP products requested most frequently by users</p>
+    </div>
+
+    <div class="chart-card">
+      <canvas id="recsChart"></canvas>
+      <p class="chart-empty" id="chart-empty" style="display:none;"></p>
+    </div>
+  </section>
+
+  <!-- View: Subscribe -->
+  <section class="view view-subscribe" id="view-subscribe">
+    <h2 class="subscribe-title">Subscribe to cloud updates</h2>
+    <p class="subscribe-sub">Get release notes and service announcements for the industry you care about.</p>
+
+    <div class="subscribe-form">
+      <label class="sub-field">
+        <span>First name</span>
+        <input type="text" id="sub-name" placeholder="Your first name" autocomplete="given-name" />
+      </label>
+
+      <label class="sub-field">
+        <span>Email</span>
+        <input type="email" id="sub-email" placeholder="you@example.com" autocomplete="email" />
+      </label>
+
+      <label class="sub-field">
+        <span>Industry</span>
+        <select id="sub-industry">
+          <option value="">Choose an industry</option>
+        </select>
+      </label>
+
+      <button class="subscribe-btn" id="sub-submit">Subscribe</button>
+      <div class="subscribe-msg" id="sub-msg"></div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script src="script.js"></script>
+</body>
+
+</html>

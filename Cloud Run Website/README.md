@@ -35,7 +35,8 @@ Vertex AI Search, and the public GCP Service Health feed.
    ```
 
 The app opens at `http://localhost:8501`. The **Weekly Digest** page is
-available from the sidebar or at `/Digest`.
+available from the sidebar nav (Dashboard / Ask Comms / Weekly Digest /
+Recommendations).
 
 ## Installation
 
@@ -65,7 +66,7 @@ design, data flow, and RAG strategy, and
 ## Deployment
 
 Cloud Comms deploys to Cloud Run via buildpacks (no Dockerfile needed) using
-the `Procfile`:
+the `Procfile` — one command builds, pushes, and deploys:
 
 ```bash
 gcloud run deploy release-agent \
@@ -74,8 +75,20 @@ gcloud run deploy release-agent \
   --region europe-west1 \
   --service-account aus-sprinternship-2026-sa@sprinternship-aus-2026.iam.gserviceaccount.com \
   --allow-unauthenticated \
-  --set-env-vars PULSE_MODEL=gemini-3.6-flash
+  --set-env-vars PULSE_MODEL=gemini-3.6-flash,GOOGLE_GENAI_USE_VERTEXAI=True,GOOGLE_CLOUD_PROJECT=sprinternship-aus-2026,GOOGLE_CLOUD_LOCATION=global
 ```
+
+The three `GOOGLE_*` vars aren't read by this repo's own code — they're
+consumed directly by the underlying `google-genai`/ADK SDK to route model
+calls through Vertex AI instead of the public Gemini API. Without them, the
+chat agent (not the health-check probe, which hardcodes Vertex explicitly)
+will silently fail to reach the model in production.
+
+Whoever runs this needs the `gcloud` CLI authenticated
+(`gcloud auth login`) as a principal with Cloud Run Admin, Cloud Build
+Editor, and Service Account User roles on `sprinternship-aus-2026` — no
+separate Docker build or `gcloud builds submit` step is needed, this one
+`deploy` command does the whole thing.
 
 ## Testing
 

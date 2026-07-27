@@ -20,23 +20,29 @@ _ICON_PATH = _GRAPHICS_DIR / "CloudComms_Icon.svg"
 
 
 @st.cache_resource
-def _logo_data_uri() -> str:
+def _logo_data_uri(_mtime: float) -> str:
     """Base64-encodes the team's CloudComms wordmark logo for inline embedding.
 
     Streamlit doesn't serve arbitrary repo files as static assets by default,
     so the SVG is inlined as a data URI rather than referenced by path.
+
+    `_mtime` is part of the cache key (not otherwise used) so editing the SVG
+    on disk busts the cache immediately — `st.cache_resource` has no TTL and
+    survives ordinary reruns, so without this a running server would keep
+    serving the pre-edit logo until it was restarted.
     """
     encoded = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
     return f"data:image/svg+xml;base64,{encoded}"
 
 
 @st.cache_resource
-def _icon_data_uri() -> str:
+def _icon_data_uri(_mtime: float) -> str:
     """Base64-encodes the CloudComms icon mark for inline embedding in raw HTML.
 
     Used by render_appbar's badge, which is hand-rolled HTML rather than a
     native st.image call, so it needs the same data-URI treatment as the
     wordmark logo above rather than Streamlit's built-in SVG-path support.
+    See `_logo_data_uri` for why `_mtime` is threaded through as a cache key.
     """
     encoded = base64.b64encode(_ICON_PATH.read_bytes()).decode("ascii")
     return f"data:image/svg+xml;base64,{encoded}"
@@ -50,7 +56,8 @@ def render_appbar(title: str, subtitle: str, icon: str | None = None) -> None:
     different glyph than the brand icon.
     """
     icon_html = (
-        f'<img src="{_icon_data_uri()}" alt="" style="width:100%;height:100%;object-fit:contain;" />'
+        f'<img src="{_icon_data_uri(_ICON_PATH.stat().st_mtime)}" alt="" '
+        'style="width:100%;height:100%;object-fit:contain;" />'
         if icon is None
         else icon
     )
@@ -68,6 +75,28 @@ def render_appbar(title: str, subtitle: str, icon: str | None = None) -> None:
     )
 
 
+def render_brand_mark(width_px: int = 160, nav_href: str | None = None) -> None:
+    """Renders the CloudComms wordmark, left-aligned, at a given pixel width.
+
+    For a small top-left brand mark on a page (e.g. the Dashboard), distinct
+    from the larger centered wordmark in render_hero_empty_state below.
+
+    `nav_href` (e.g. "?nav=ask_comms") wraps the logo in a plain anchor tag
+    reusing the same query-param deep-link mechanism as app.py's `?q=` chat
+    prefill, rather than a JS/CSS button-overlay hack — a real link click
+    triggers a normal page load Streamlit picks the query param up from.
+    """
+    img_html = (
+        f'<img src="{_logo_data_uri(_LOGO_PATH.stat().st_mtime)}" alt="CloudComms logo" '
+        f'style="width:{width_px}px; height:auto; display:block;" />'
+    )
+    if nav_href:
+        img_html = (
+            f'<a href="{nav_href}" target="_self" class="pulse-brand-link">{img_html}</a>'
+        )
+    st.markdown(img_html, unsafe_allow_html=True)
+
+
 def render_hero_empty_state(title: str, subtitle: str) -> None:
     """Renders the CloudComms "hero moment" header: tagline, wordmark, caption.
 
@@ -80,7 +109,7 @@ def render_hero_empty_state(title: str, subtitle: str) -> None:
         f"""
         <div class="pulse-hero">
             <p class="pulse-hero-subtext">{title}</p>
-            <img class="pulse-hero-logo" src="{_logo_data_uri()}" alt="CloudComms logo" />
+            <img class="pulse-hero-logo" src="{_logo_data_uri(_LOGO_PATH.stat().st_mtime)}" alt="CloudComms logo" />
             <p class="pulse-hero-caption">{subtitle}</p>
         </div>
         """,

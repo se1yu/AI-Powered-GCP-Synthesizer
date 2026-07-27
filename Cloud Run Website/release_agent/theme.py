@@ -302,12 +302,64 @@ GLOBAL_CSS = """<style>
   section[data-testid="stSidebar"] {
       background: linear-gradient(180deg, rgba(251, 188, 5, 0.35) 0%, rgba(60, 132, 252, 0.35) 100%);
       border-right: 1px solid var(--pulse-outline-variant);
+      position: relative;
+  }
+
+  /* Clickable logo (see ui.py's render_brand_mark nav_href) — just a hover
+     affordance, the click itself is a plain anchor tag, not JS. */
+  .pulse-brand-link {
+      display: inline-block;
+      cursor: pointer;
+      transition: opacity var(--pulse-duration-short) var(--pulse-ease-standard);
+  }
+  .pulse-brand-link:hover { opacity: 0.82; }
+
+  /* Pulls the logo (the only thing left in normal flow — sidebar_nav below
+     is absolutely positioned and ignores this) into the actual top-left
+     corner instead of sitting inset by Streamlit's default sidebar padding. */
+  section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"] {
+      padding-top: 0.25rem;
+      padding-left: 0.25rem;
+  }
+
+  /* Nav rail is absolutely centered against the full sidebar height (not a
+     flex sibling of the logo) — a flex/min-height approach here fought
+     Streamlit's own sidebar padding and never landed dead-center. The logo
+     stays in normal flow, pinned at the top; this floats independently at
+     the vertical midpoint of section[data-testid="stSidebar"] itself. */
+  .st-key-sidebar_nav {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
   }
 
   /* ── Chat message density + shape (M3 Expressive bubble tension) ─── */
   div[data-testid="stChatMessage"] {
       border-radius: var(--pulse-shape-xl);
       padding: var(--pulse-space-2) var(--pulse-space-2);
+      animation: pulse-fade-in var(--pulse-duration-medium) var(--pulse-ease-emphasized);
+  }
+
+  /* TAM's own chat turn: no avatar, right-aligned bubble (see app.py's
+     _render_user_message — st.chat_message can't render a blank avatar). */
+  .pulse-user-message {
+      background: var(--pulse-primary-container);
+      color: var(--pulse-on-primary-container);
+      border-radius: var(--pulse-shape-xl);
+      padding: var(--pulse-space-3) var(--pulse-space-4);
+      margin: var(--pulse-space-2) 0;
+      margin-left: auto;
+      max-width: 75%;
+      width: fit-content;
+      white-space: pre-wrap;
+      font-family: "Roboto", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
       animation: pulse-fade-in var(--pulse-duration-medium) var(--pulse-ease-emphasized);
   }
 
@@ -324,6 +376,58 @@ GLOBAL_CSS = """<style>
   .stButton > button:hover, .stDownloadButton > button:hover {
       background: #F0F3FF !important;
       transform: translateY(-2px);
+  }
+
+  /* ── Sidebar nav rail: liquid-glass tabs + New Chat CTA ───────────── */
+  /* The 4 page tabs: frosted, translucent "liquid glass" pills — the
+     sidebar's own gradient shows through blurred via backdrop-filter,
+     with a soft outer glow and an inner highlight to read as glass rather
+     than flat tint. `[class*=...]` matches any nav_<page>_active/inactive
+     key without enumerating every one. */
+  [class*="st-key-nav_"] button {
+      background: rgba(255, 255, 255, 0.28) !important;
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      /* Hardcoded, not var(--pulse-on-surface): that variable flips to a
+         light gray under OS dark mode, but the sidebar's own gradient
+         background never does — that mismatch was making this text nearly
+         invisible for anyone with a dark-mode system. */
+      color: #1A1A1A !important;
+      font-weight: 700 !important;
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      box-shadow:
+          0 4px 16px rgba(31, 38, 135, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6),
+          inset 0 -1px 6px rgba(255, 255, 255, 0.15) !important;
+  }
+  [class*="st-key-nav_"] button:hover {
+      background: rgba(255, 255, 255, 0.42) !important;
+      transform: translateY(-2px);
+      box-shadow:
+          0 6px 20px rgba(31, 38, 135, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+  }
+  /* Active tab: same glass, tinted with the brand color for a lit-up look. */
+  .st-key-nav_dashboard_active button,
+  .st-key-nav_ask_comms_active button,
+  .st-key-nav_weekly_digest_active button,
+  .st-key-nav_recommendations_active button {
+      background: rgba(11, 87, 208, 0.22) !important;
+      border-color: rgba(11, 87, 208, 0.5) !important;
+      color: #041E49 !important;
+      box-shadow:
+          0 4px 18px rgba(11, 87, 208, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+  }
+  /* "+ New Chat": solid brand-blue pill CTA, distinct from nav buttons. */
+  .st-key-new_chat button {
+      background: var(--pulse-primary) !important;
+      border-color: var(--pulse-primary) !important;
+      color: var(--pulse-on-primary) !important;
+  }
+  .st-key-new_chat button:hover {
+      background: #0842A0 !important;
+      border-color: #0842A0 !important;
   }
 
   /* ── Chat input: rounded search-bar treatment ─────────────────────── */

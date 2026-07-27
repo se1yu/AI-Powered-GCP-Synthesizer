@@ -16,3 +16,9 @@ __pycache__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local archives/backups — these have already blown past GitHub's 100MB
+# file limit once (see backup-before-cleanup-2026-07-27 tag); never commit
+# a zipped/rar'd copy of the project, share it some other way instead.
+*.rar
+*.zip
