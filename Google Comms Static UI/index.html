@@ -12,23 +12,12 @@
        before it's ever inserted into the page. -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-  <!-- Spline's 3D-scene viewer web component, for the intro overlay below. -->
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></script>
 </head>
 
 <body>
 
-  <!-- Fullscreen intro: dismissed by a click or any keypress (see script.js). -->
-  <div id="intro-overlay">
-    <!-- TODO: replace this url with your own published Spline scene —
-         from your Spline project: Export > Public URL (or the embed code's
-         url="..." attribute). Get one at https://spline.design if needed. -->
-    <spline-viewer url="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></spline-viewer>
-    <p class="intro-prompt">Click or press any key to continue</p>
-  </div>
-
   <!-- Wrapper container holding everything -->
-  <div class="app-container" style="display:none;">
+  <div class="app-container">
 
     <!-- Left Sidebar -->
     <aside class="sidebar">

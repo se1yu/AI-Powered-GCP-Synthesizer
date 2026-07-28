@@ -1,39 +1,6 @@
 console.log("Connected!");
 
 /* ============================================================
-   INTRO OVERLAY (Spline 3D scene, dismissed by click or keypress)
-   ============================================================ */
-
-document.addEventListener("DOMContentLoaded", () => {
-    const intro = document.getElementById("intro-overlay");
-    const appContainer = document.querySelector(".app-container");
-    let isDismissed = false;
-
-    function dismissIntro() {
-        if (isDismissed || !intro) return;
-        isDismissed = true;
-
-        if (appContainer) {
-            appContainer.style.display = "flex";
-        }
-
-        intro.classList.add("fade-out");
-
-        // Fully remove it after the fade animation finishes, rather than
-        // leaving an invisible-but-still-there fixed/inset:0 element
-        // sitting over the page (pointer-events:none on .fade-out already
-        // stops it intercepting clicks, but display:none is the clean end state).
-        setTimeout(() => {
-            intro.style.display = "none";
-        }, 600);
-    }
-
-    window.addEventListener("keydown", dismissIntro, { once: true });
-    if (intro) intro.addEventListener("click", dismissIntro, { once: true });
-});
-
-
-/* ============================================================
    SHARED DATA
    ============================================================ */
 
