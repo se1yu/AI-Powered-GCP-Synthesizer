@@ -1,6 +1,39 @@
 console.log("Connected!");
 
 /* ============================================================
+   INTRO OVERLAY (Spline 3D scene, dismissed by click or keypress)
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    const intro = document.getElementById("intro-overlay");
+    const appContainer = document.querySelector(".app-container");
+    let isDismissed = false;
+
+    function dismissIntro() {
+        if (isDismissed || !intro) return;
+        isDismissed = true;
+
+        if (appContainer) {
+            appContainer.style.display = "flex";
+        }
+
+        intro.classList.add("fade-out");
+
+        // Fully remove it after the fade animation finishes, rather than
+        // leaving an invisible-but-still-there fixed/inset:0 element
+        // sitting over the page (pointer-events:none on .fade-out already
+        // stops it intercepting clicks, but display:none is the clean end state).
+        setTimeout(() => {
+            intro.style.display = "none";
+        }, 600);
+    }
+
+    window.addEventListener("keydown", dismissIntro, { once: true });
+    if (intro) intro.addEventListener("click", dismissIntro, { once: true });
+});
+
+
+/* ============================================================
    SHARED DATA
    ============================================================ */
 
@@ -206,7 +239,18 @@ let askBusy = false;
 function appendMessage(role, text) {
     const div = document.createElement("div");
     div.className = `message ${role === "user" ? "user-message" : "agent-message"}`;
-    div.textContent = text;
+
+    if (role === "user") {
+        // The TAM's own typed text — plain, no markdown to render, and
+        // textContent auto-escapes it so it can never be read as HTML.
+        div.textContent = text;
+    } else {
+        // The agent's answer is real markdown (bold, bullet lists, links) —
+        // parse it to HTML, then sanitize before inserting, in case a
+        // response ever contains something that looks like a raw tag.
+        div.innerHTML = DOMPurify.sanitize(marked.parse(text));
+    }
+
     chatHistory.appendChild(div);
     chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: "smooth" });
     return div;

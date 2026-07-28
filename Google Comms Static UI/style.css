@@ -271,7 +271,6 @@
     border-radius: 8px;
     font-size: 14px;
     line-height: 1.4;
-    white-space: pre-wrap;
     opacity: 0;
     transform: translateY(6px);
     animation: messageIn 0.25s ease forwards;
@@ -291,10 +290,22 @@
     align-self: flex-start;
   }
 
+  /* The agent's message is rendered markdown (see script.js's appendMessage),
+     so it needs real block-element spacing instead of relying on
+     white-space: pre-wrap — browsers already collapse whitespace correctly
+     for actual <p>/<ul>/<li> tags. */
+  .agent-message p { margin: 0 0 8px 0; }
+  .agent-message p:last-child { margin-bottom: 0; }
+  .agent-message ul, .agent-message ol { margin: 0 0 8px 20px; padding: 0; }
+  .agent-message ul:last-child, .agent-message ol:last-child { margin-bottom: 0; }
+  .agent-message a { color: #2563eb; text-decoration: underline; }
+  .agent-message code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 13px; }
+
   .user-message {
     background-color: #2563eb;
     color: white;
     align-self: flex-end;
+    white-space: pre-wrap;
   }
 
   /* Typing indicator (shown in an .agent-message bubble while /ask is in flight) */
@@ -678,4 +689,49 @@
     color: #5f6368;
     font-size: 14px;
     padding: 48px 12px;
+  }
+
+  /* Fullscreen Intro Overlay */
+  #intro-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background-color: #000000; /* Matches typical 3D dark canvas backgrounds */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+    cursor: pointer;
+  }
+
+  #intro-overlay spline-viewer {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Floating call-to-action prompt */
+  .intro-prompt {
+    position: absolute;
+    bottom: 40px;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    animation: pulsePrompt 2s infinite ease-in-out;
+  }
+
+  @keyframes pulsePrompt {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Dismissed State */
+  #intro-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
