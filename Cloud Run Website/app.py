@@ -268,20 +268,28 @@ def _render_dashboard() -> None:
     "General" sits first in the dropdown and is the default selection, so
     Cloud Comms gives generic recommendations until a TAM narrows it to a
     specific industry. Whatever is picked here persists in
-    `st.session_state["dashboard_category"]` (via the widget's `key`) and is
-    picked up as standing chat context by `_apply_active_filters` — this
-    page has no free-text input, only this closed dropdown.
+    `st.session_state["customer_category"]` and is picked up as standing
+    chat context by `_apply_active_filters` — this page has no free-text
+    input, only this closed dropdown.
+
+    The picked value is copied into `customer_category` rather than read
+    straight from the widget's own `dashboard_category` key: Streamlit
+    drops a widget-backed session_state key entirely once that widget
+    stops being rendered (e.g. the TAM navigates to another page), so
+    reading `dashboard_category` directly from `_apply_active_filters`
+    would silently lose the selection the moment the TAM left this page.
     """
     _, center, _ = st.columns([1, 2, 1])
     with center:
         render_hero_empty_state("Stay updated in the cloud!", "")
-        st.selectbox(
+        category = st.selectbox(
             "Customer category",
             _CUSTOMER_CATEGORIES,
             index=0,
             label_visibility="collapsed",
             key="dashboard_category",
         )
+        st.session_state["customer_category"] = category
 
 
 def _render_recommendations() -> None:
@@ -580,7 +588,7 @@ def _apply_active_filters(query: str) -> str:
             + "."
         )
 
-    category = st.session_state.get("dashboard_category")
+    category = st.session_state.get("customer_category")
     if category and category != "General":
         notes.append(
             f"The TAM's customer is in the {category} industry — where "
@@ -618,7 +626,7 @@ def _render_ask_comms() -> None:
 
     render_hero_empty_state(
         "Ask Comms about GCP release notes or live status",
-        "Assistance on reliablly searching across every Google Cloud product",
+        "Assistance on reliably searching across every Google Cloud product",
     )
 
     for i, msg in enumerate(st.session_state["messages"]):

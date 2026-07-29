@@ -35,7 +35,7 @@ Vertex AI Search, and the public GCP Service Health feed.
    ```
 
 The app opens at `http://localhost:8501`. The sidebar includes Dashboard,
-Ask Comms, Weekly Digest, Recommendations, and Subscribe.
+Ask Comms, Weekly Digest, and Subscribe.
 
 ## Personalized email digests
 
@@ -61,8 +61,10 @@ on the next scheduled run.
 ## Installation
 
 See [Quick start](#quick-start). Production dependencies are pinned in
-`requirements.txt`; dev tools (`pytest`, `ruff`, `bandit`) are declared in
-`pyproject.toml` and the CI workflow.
+`requirements.txt`. `ruff` and `bandit` are configured in `pyproject.toml`
+and `.pre-commit-config.yaml`, but aren't in `requirements.txt` — install
+them yourself (`pip install ruff bandit[toml] pre-commit`) if you want to
+run the checks below locally.
 
 ## Usage
 
@@ -80,8 +82,7 @@ page load.
 ## Architecture
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full system
-design, data flow, and RAG strategy, and
-[docs/CUJ.md](docs/CUJ.md) for critical user journeys.
+design, module responsibilities, data flow, and RAG strategy.
 
 ## Deployment
 
@@ -112,11 +113,12 @@ separate Docker build or `gcloud builds submit` step is needed, this one
 
 ## Testing
 
-```bash
-pytest -v --tb=short
-```
+There's no automated test suite in this repo yet (`pytest` has nothing to
+collect). Verify changes by running the app locally and exercising the
+page you touched.
 
-Run linting and security scans before committing:
+Run linting and security scans before committing — these are configured
+and do work today:
 
 ```bash
 ruff check .
@@ -127,12 +129,11 @@ pre-commit run --all-files
 ## Contributing
 
 1. Create a feature branch.
-1. Make focused, incremental changes with tests.
+1. Make focused, incremental changes.
 1. Run `pre-commit run --all-files` before opening a pull request.
 1. Update `CHANGELOG.md` for any user-facing change.
 
 ## See also
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/CUJ.md](docs/CUJ.md)
 - [CHANGELOG.md](CHANGELOG.md)
