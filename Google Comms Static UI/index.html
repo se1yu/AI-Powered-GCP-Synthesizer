@@ -15,6 +15,15 @@
 
 <body>
 
+  <!-- Fullscreen intro: dismissed by a click or any keypress (see script.js). -->
+  <div id="intro-overlay">
+    <!-- TODO: replace this url with your own published Spline scene —
+         from your Spline project: Export > Public URL (or the embed code's
+         url="..." attribute). Get one at https://spline.design if needed. -->
+    <spline-viewer url="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></spline-viewer>
+    <p class="intro-prompt">Click or press any key to continue</p>
+  </div>
+
   <!-- Wrapper container holding everything -->
   <div class="app-container">
 
@@ -120,6 +129,19 @@
         <button class="suggest-pill">Latest updates in the cloud</button>
         <button class="suggest-pill">Show today's service announcements</button>
       </div>
+    </div>
+  </section>
+
+  <!-- View: Recommendations -->
+  <section class="view view-recs" id="view-recs">
+    <div class="recs-header">
+      <h2 class="recs-title">Product Update Frequency</h2>
+      <p class="subtext-under-logo">Visualization of GCP products requested most frequently by users</p>
+    </div>
+
+    <div class="chart-card">
+      <canvas id="recsChart"></canvas>
+      <p class="chart-empty" id="chart-empty" style="display:none;"></p>
     </div>
   </section>
 
