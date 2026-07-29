@@ -11,6 +11,6 @@ AI-powered Product Synthesizer that automatically ingests and processes  public 
 | Leslie Tejeda Peña | @LTejeda2006     |x |
 | Brianna Ikwuemesi    | @xCBriannaI  |x              |
 | Purnoor Sharma     | @noorps     | x |
-| Rahel Ayele      | @x    |x           |
+| Rahel Ayele      | @rahelayele    |x           |
 
 ---
