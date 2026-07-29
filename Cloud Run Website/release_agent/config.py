@@ -75,6 +75,8 @@ class Settings:
     app_name: str = os.environ.get("PULSE_APP_NAME", _DEFAULT_APP_NAME)
     service_account: str = os.environ.get("PULSE_SERVICE_ACCOUNT", _DEFAULT_SERVICE_ACCOUNT)
     vertex_engine_id: str = os.environ.get("PULSE_VERTEX_ENGINE_ID", "")
+    subscribers_dataset: str = os.environ.get("PULSE_SUBSCRIBERS_DATASET", "comms")
+    subscribers_table: str = os.environ.get("PULSE_SUBSCRIBERS_TABLE", "subscribers")
 
     @property
     def table_fqn(self) -> str:
@@ -94,7 +96,7 @@ class Settings:
     @property
     def subscribers_table_fqn(self) -> str:
         """Fully-qualified BigQuery table name for digest subscriptions."""
-        return f"{self.project}.{self.dataset}.pulse_subscribers"
+        return f"{self.project}.{self.subscribers_dataset}.{self.subscribers_table}"
 
 
 SETTINGS = Settings()

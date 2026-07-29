@@ -44,7 +44,10 @@ frequency in BigQuery. The scheduled worker grounds Gemini with current
 release activity and the live Google Cloud Service Health feed, then emails
 an industry-aware summary.
 
-1. Create the subscriber table with `sql/create_subscribers_table.sql`.
+1. Use the existing `comms.subscribers` table. For an older four-column
+   version created by the Flask prototype, run
+   `sql/migrate_existing_subscribers.sql` once. For a new environment, use
+   `sql/create_subscribers_table.sql`.
 2. Configure the `PULSE_SMTP_*` and `PULSE_EMAIL_FROM` variables documented
    in `.env.example`, including `PULSE_APP_URL` for unsubscribe links. Store
    the SMTP password in Secret Manager in production.

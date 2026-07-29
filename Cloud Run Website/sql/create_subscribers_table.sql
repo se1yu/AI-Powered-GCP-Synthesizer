@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `sprinternship-aus-2026.release_notes.pulse_subscribers` (
+CREATE TABLE IF NOT EXISTS `sprinternship-aus-2026.comms.subscribers` (
   email STRING NOT NULL,
   first_name STRING NOT NULL,
   industry STRING NOT NULL,
