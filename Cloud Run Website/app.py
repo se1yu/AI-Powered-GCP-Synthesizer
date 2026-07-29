@@ -7,9 +7,9 @@ never talks to BigQuery/HTTP directly (see release_agent/sources.py) and
 never builds HTML for data (see release_agent/ui.py). See
 docs/ARCHITECTURE.md for the full data-flow diagram.
 
-Single-file, session-state-routed multipage UI: the sidebar has exactly
-three destinations (Dashboard, Ask Comms, Weekly Digest) that swap the
-main-content render function rather than relying on
+Single-file, session-state-routed multipage UI: the sidebar has four
+destinations (Dashboard, Ask Comms, Weekly Digest, Subscribe)
+that swap the main-content render function rather than relying on
 Streamlit's native pages/ directory navigation, so the sidebar can stay a
 fixed, minimal nav rail instead of an auto-generated page list.
 """
@@ -35,6 +35,7 @@ from release_agent.feedback import record_feedback
 from release_agent.health import check_model_health
 from release_agent.history import load_chat_history, save_chat_message
 from release_agent.sources import fetch_service_health, get_recent_summary
+from release_agent.subscriptions import FREQUENCIES, save_subscription, unsubscribe
 from release_agent.theme import GLOBAL_CSS
 from release_agent.ui import (
     render_appbar,
@@ -87,7 +88,7 @@ _CUSTOMER_CATEGORIES = (
     "Education",
 )
 
-_PAGES = ("Dashboard", "Ask Comms", "Weekly Digest")
+_PAGES = ("Dashboard", "Ask Comms", "Weekly Digest", "Subscribe")
 _PAGE_SLUGS = {label.lower().replace(" ", "_"): label for label in _PAGES}
 
 # Pins session_id to the browser across refreshes (st.session_state alone
@@ -281,6 +282,81 @@ def _render_dashboard() -> None:
             label_visibility="collapsed",
             key="dashboard_category",
         )
+
+
+def _render_recommendations() -> None:
+    """Renders the Recommendations page placeholder."""
+    st.write("Recommendations — coming soon")
+
+
+def _render_subscribe() -> None:
+    """Renders the industry-aware email subscription form."""
+    render_appbar(
+        "Subscribe",
+        "Personalized Google Cloud releases and service-health updates",
+        icon="\U0001f4e8",
+    )
+    unsubscribe_token = st.query_params.get("unsubscribe", "")
+    if unsubscribe_token:
+        try:
+            removed = unsubscribe(unsubscribe_token)
+        except Exception:  # noqa: BLE001 - show a safe UI error, not a traceback
+            removed = False
+        st.query_params.pop("unsubscribe", None)
+        if removed:
+            st.success("You've been unsubscribed from Cloud Comms emails.")
+        else:
+            st.warning("That unsubscribe link is invalid or has already been used.")
+    st.markdown(
+        """
+        <div class="pulse-card">
+          <div class="pulse-title">Updates matched to your industry</div>
+          <div class="pulse-body">
+            Cloud Comms prioritizes relevant release notes, summarizes active
+            outage incidents, and explains why the changes may matter to your work.
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    selected_industry = st.session_state.get("dashboard_category", "General")
+    default_industry_index = (
+        _CUSTOMER_CATEGORIES.index(selected_industry)
+        if selected_industry in _CUSTOMER_CATEGORIES
+        else 0
+    )
+    _, form_column, _ = st.columns([1, 2, 1])
+    with form_column, st.form("subscribe_form"):
+        first_name = st.text_input("First name", placeholder="Your first name")
+        email = st.text_input("Email", placeholder="you@company.com")
+        industry = st.selectbox(
+            "Industry",
+            _CUSTOMER_CATEGORIES,
+            index=default_industry_index,
+            help="Used only to prioritize and explain relevant cloud updates.",
+        )
+        frequency = st.segmented_control(
+            "Email frequency", tuple(FREQUENCIES), default="Weekly"
+        )
+        consent = st.checkbox(
+            "I agree to receive Cloud Comms email updates and can unsubscribe later."
+        )
+        submitted = st.form_submit_button(
+            "Subscribe to updates", icon="\U0001f514", use_container_width=True
+        )
+
+    if not submitted:
+        return
+    if not consent:
+        st.warning("Please confirm that you want to receive email updates.")
+        return
+
+    result = save_subscription(first_name, email, industry, frequency or "Weekly")
+    if result["ok"]:
+        st.success(result["message"])
+    else:
+        st.error(result["message"])
 
 
 def _render_weekly_digest() -> None:
@@ -595,8 +671,10 @@ def main() -> None:
         _render_dashboard()
     elif page == "Ask Comms":
         _render_ask_comms()
-    else:
+    elif page == "Weekly Digest":
         _render_weekly_digest()
+    else:
+        _render_subscribe()
 
 
 if __name__ == "__main__":

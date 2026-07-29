@@ -91,5 +91,10 @@ class Settings:
         """Fully-qualified BigQuery table name for persisted chat history."""
         return f"{self.project}.{self.dataset}.pulse_chat_history"
 
+    @property
+    def subscribers_table_fqn(self) -> str:
+        """Fully-qualified BigQuery table name for digest subscriptions."""
+        return f"{self.project}.{self.dataset}.pulse_subscribers"
+
 
 SETTINGS = Settings()

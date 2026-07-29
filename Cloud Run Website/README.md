@@ -34,9 +34,29 @@ Vertex AI Search, and the public GCP Service Health feed.
    streamlit run app.py
    ```
 
-The app opens at `http://localhost:8501`. The **Weekly Digest** page is
-available from the sidebar nav (Dashboard / Ask Comms / Weekly Digest /
-Recommendations).
+The app opens at `http://localhost:8501`. The sidebar includes Dashboard,
+Ask Comms, Weekly Digest, Recommendations, and Subscribe.
+
+## Personalized email digests
+
+The Subscribe page stores a person's name, email, industry, and preferred
+frequency in BigQuery. The scheduled worker grounds Gemini with current
+release activity and the live Google Cloud Service Health feed, then emails
+an industry-aware summary.
+
+1. Create the subscriber table with `sql/create_subscribers_table.sql`.
+2. Configure the `PULSE_SMTP_*` and `PULSE_EMAIL_FROM` variables documented
+   in `.env.example`, including `PULSE_APP_URL` for unsubscribe links. Store
+   the SMTP password in Secret Manager in production.
+3. Deploy `send_digests.py` as a Cloud Run Job using the same image and
+   service account as the web app, overriding its command to
+   `python send_digests.py`.
+4. Use Cloud Scheduler to execute that job once per day. The worker reads
+   `next_send_at`, so each person receives mail only at their selected weekly,
+   biweekly, or monthly interval.
+
+Failed sends do not advance the next delivery date, so they can be retried
+on the next scheduled run.
 
 ## Installation
 

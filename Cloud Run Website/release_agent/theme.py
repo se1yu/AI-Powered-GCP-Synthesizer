@@ -120,8 +120,9 @@ GLOBAL_CSS = """<style>
     --pulse-duration-long: 450ms;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+  /* Follow Streamlit's selected theme, not the operating-system preference.
+     Otherwise a light Streamlit page on a dark OS gets dark cards with dark text. */
+  [data-theme="dark"] {
       --pulse-primary: #A8C7FA;
       --pulse-on-primary: #062E6F;
       --pulse-primary-container: #0842A0;
@@ -145,7 +146,6 @@ GLOBAL_CSS = """<style>
       --pulse-on-surface-variant: #C4C7C5;
       --pulse-outline: #8E918F;
       --pulse-outline-variant: #444746;
-    }
   }
 
   /* ── Typography scale (Roboto / Google Sans, M3 Expressive weights) ── */
@@ -446,10 +446,8 @@ GLOBAL_CSS = """<style>
   .pulse-empty { text-align: center; padding: var(--pulse-space-8) 0; opacity: 0.7; }
   .pulse-empty .pulse-empty-icon { font-size: 44px; }
 
-  @media (prefers-color-scheme: dark) {
-    .pulse-badge-DEPRECATION { background: #5C4200; color: #F3CB63; }
-    .pulse-sev-MEDIUM { background: #5C4200; color: #F3CB63; }
-    .pulse-card { border-color: rgba(255,255,255,0.14); }
-  }
+  [data-theme="dark"] .pulse-badge-DEPRECATION { background: #5C4200; color: #F3CB63; }
+  [data-theme="dark"] .pulse-sev-MEDIUM { background: #5C4200; color: #F3CB63; }
+  [data-theme="dark"] .pulse-card { border-color: rgba(255,255,255,0.14); }
 </style>
 """
