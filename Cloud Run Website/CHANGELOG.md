@@ -2,6 +2,11 @@
 
 All notable changes to Pulse are documented in this file.
 
+## Unreleased
+
+- Added a styled Subscribe destination with industry and delivery-frequency controls.
+- Added BigQuery subscription persistence and a scheduled personalized email worker.
+
 ## [1.0.0] - 2026-07-22
 
 ### Added
