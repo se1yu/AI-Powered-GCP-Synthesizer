@@ -147,6 +147,65 @@ document.addEventListener("click", (e) => {
 
 
 /* ============================================================
+   SIDEBAR RESIZE
+   ============================================================ */
+
+(function initSidebarResize() {
+    const resizer = document.getElementById("sidebar-resizer");
+    const root = document.documentElement;
+    const STORAGE_KEY = "cc-sidebar-width";
+    const MIN = 260;
+    const MAX = 560;
+
+    const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    if (saved && saved >= MIN && saved <= MAX) {
+        root.style.setProperty("--sidebar-width", `${saved}px`);
+    }
+
+    function currentWidth() {
+        return parseInt(getComputedStyle(root).getPropertyValue("--sidebar-width"), 10) || 383;
+    }
+
+    function setWidth(px) {
+        const clamped = Math.min(MAX, Math.max(MIN, px));
+        root.style.setProperty("--sidebar-width", `${clamped}px`);
+        return clamped;
+    }
+
+    let dragging = false;
+
+    resizer.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        dragging = true;
+        resizer.classList.add("dragging");
+        document.body.classList.add("sidebar-resizing");
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        setWidth(e.clientX);
+    });
+
+    document.addEventListener("mouseup", () => {
+        if (!dragging) return;
+        dragging = false;
+        resizer.classList.remove("dragging");
+        document.body.classList.remove("sidebar-resizing");
+        localStorage.setItem(STORAGE_KEY, currentWidth());
+    });
+
+    // Keyboard support for the aria "separator" role — arrow keys nudge the width.
+    resizer.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        e.preventDefault();
+        const delta = e.key === "ArrowRight" ? 20 : -20;
+        const next = setWidth(currentWidth() + delta);
+        localStorage.setItem(STORAGE_KEY, next);
+    });
+})();
+
+
+/* ============================================================
    VIEW SWITCHING (sidebar nav)
    ============================================================ */
 
@@ -159,11 +218,6 @@ function showView(id) {
 }
 
 navButtons.forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
-
-// Recommendations' chart is fetched lazily, only when that tab is opened —
-// no point hitting the server for it if nobody ever looks at that view.
-document.querySelector('.dashboard-button[data-view="view-recs"]')
-    .addEventListener("click", loadRecsChart);
 
 
 /* ============================================================
@@ -281,66 +335,6 @@ askInput.addEventListener("keydown", (e) => {
 document.querySelectorAll(".suggest-pill").forEach(pill => {
     pill.addEventListener("click", () => sendAsk(pill.textContent));
 });
-
-
-/* ============================================================
-   RECOMMENDATIONS — subscriber-by-industry chart
-   ============================================================ */
-
-let recsChartInstance = null;
-
-async function loadRecsChart() {
-    const canvas = document.getElementById("recsChart");
-    const emptyMsg = document.getElementById("chart-empty");
-
-    try {
-        const res = await fetch(`${API_BASE}/subscriber-counts`);
-        const data = await res.json();
-        const counts = data.counts || {};
-        const labels = Object.keys(counts);
-
-        if (labels.length === 0) {
-            canvas.style.display = "none";
-            emptyMsg.textContent = "No subscribers yet — once people sign up, "
-                + "their industries will show up here.";
-            emptyMsg.style.display = "block";
-            return;
-        }
-
-        canvas.style.display = "block";
-        emptyMsg.style.display = "none";
-
-        const values = labels.map(l => counts[l]);
-        const colors = labels.map(l => {
-            const domain = DOMAINS.find(d => d.name === l);
-            return domain ? domain.color : "#3C84FC";
-        });
-
-        if (recsChartInstance) recsChartInstance.destroy();
-        recsChartInstance = new Chart(canvas, {
-            type: "bar",
-            data: {
-                labels,
-                datasets: [{
-                    label: "Subscribers",
-                    data: values,
-                    backgroundColor: colors,
-                    borderRadius: 8,
-                }],
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        canvas.style.display = "none";
-        emptyMsg.textContent = "Couldn't reach the server — is subscribe_server.py running?";
-        emptyMsg.style.display = "block";
-    }
-}
 
 
 /* ============================================================

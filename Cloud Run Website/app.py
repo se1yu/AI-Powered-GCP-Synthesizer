@@ -8,8 +8,8 @@ never builds HTML for data (see release_agent/ui.py). See
 docs/ARCHITECTURE.md for the full data-flow diagram.
 
 Single-file, session-state-routed multipage UI: the sidebar has exactly
-four destinations (Dashboard, Ask Comms, Weekly Digest, Recommendations)
-that swap the main-content render function rather than relying on
+three destinations (Dashboard, Ask Comms, Weekly Digest) that swap the
+main-content render function rather than relying on
 Streamlit's native pages/ directory navigation, so the sidebar can stay a
 fixed, minimal nav rail instead of an auto-generated page list.
 """
@@ -21,6 +21,7 @@ import logging
 import uuid
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
@@ -86,7 +87,7 @@ _CUSTOMER_CATEGORIES = (
     "Education",
 )
 
-_PAGES = ("Dashboard", "Ask Comms", "Weekly Digest", "Recommendations")
+_PAGES = ("Dashboard", "Ask Comms", "Weekly Digest")
 _PAGE_SLUGS = {label.lower().replace(" ", "_"): label for label in _PAGES}
 
 # Pins session_id to the browser across refreshes (st.session_state alone
@@ -106,8 +107,8 @@ st.set_page_config(
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 # The pages/ directory would make Streamlit auto-render its own page list at
 # the top of the sidebar. That nav would be redundant with — and visually
-# clash with — the fixed Dashboard/Ask Comms/Weekly Digest/Recommendations
-# rail below, so it's hidden; every page now lives in this file instead.
+# clash with — the fixed Dashboard/Ask Comms/Weekly Digest rail below, so
+# it's hidden; every page now lives in this file instead.
 st.markdown(
     '<style>[data-testid="stSidebarNav"] {display: none;}</style>', unsafe_allow_html=True
 )
@@ -227,7 +228,7 @@ async def _stream_agent_response(query: str):
 
 
 def _render_sidebar() -> None:
-    """Renders the fixed sidebar nav rail — exactly the 4 page tabs + New Chat.
+    """Renders the fixed sidebar nav rail — exactly the 3 page tabs + New Chat.
 
     Each nav button switches `st.session_state["page"]` rather than linking
     to a separate Streamlit page, so the sidebar itself never changes shape.
@@ -282,17 +283,11 @@ def _render_dashboard() -> None:
         )
 
 
-def _render_recommendations() -> None:
-    """Renders the Recommendations page placeholder."""
-    st.write("Recommendations — coming soon")
-
-
 def _render_weekly_digest() -> None:
     """Renders the Weekly Digest page: chart-backed release activity + live status."""
     render_appbar(
         "Weekly Digest",
         "Release activity + live status across Google Cloud",
-        icon="\U0001f4ca",
     )
 
     days_back = st.segmented_control(
@@ -321,8 +316,25 @@ def _render_weekly_digest() -> None:
 
             df = pd.DataFrame(rows)
             st.markdown("#### By product")
-            chart_df = df.groupby("product")["count"].sum().sort_values(ascending=False).head(15)
-            st.bar_chart(chart_df)
+            chart_df = (
+                df.groupby("product")["count"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(15)
+                .reset_index()
+            )
+            # st.bar_chart doesn't expose axis config, so this drops to Altair
+            # directly to angle the product labels — with 15 product names,
+            # horizontal labels overlap into an unreadable smear.
+            chart = (
+                alt.Chart(chart_df)
+                .mark_bar(color="#0B57D0")
+                .encode(
+                    x=alt.X("product", sort="-y", title=None, axis=alt.Axis(labelAngle=-45)),
+                    y=alt.Y("count", title=None),
+                )
+            )
+            st.altair_chart(chart, use_container_width=True)
 
             st.markdown("#### Breakdown")
             st.dataframe(
@@ -573,7 +585,7 @@ def _render_ask_comms() -> None:
 
 
 def main() -> None:
-    """Entry point: routes between Dashboard, Ask Comms, Weekly Digest, Recommendations."""
+    """Entry point: routes between Dashboard, Ask Comms, Weekly Digest."""
     _init_session_state()
     _consume_nav_query()
     _render_sidebar()
@@ -583,10 +595,8 @@ def main() -> None:
         _render_dashboard()
     elif page == "Ask Comms":
         _render_ask_comms()
-    elif page == "Weekly Digest":
-        _render_weekly_digest()
     else:
-        _render_recommendations()
+        _render_weekly_digest()
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agent Dashboard</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Renders the agent's markdown responses (bold, lists, links) as real
        HTML instead of raw "**text**" — DOMPurify sanitizes the parsed HTML
        before it's ever inserted into the page. -->
@@ -23,11 +22,14 @@
     <aside class="sidebar">
       <button class="dashboard-button active" data-view="view-home">Dashboard</button>
       <button class="dashboard-button" data-view="view-askcomms">Ask Comms</button>
-      <button class="dashboard-button" data-view="view-recs">Recommendations</button>
       <button class="dashboard-button" data-view="view-subscribe">Subscribe</button>
       <button class="new-chat-btn">+ New Chat</button>
       <div class="selected-client" id="selected-client"></div>
     </aside>
+
+    <!-- Drag handle: lets a TAM widen/narrow the sidebar; width persists via localStorage (see script.js) -->
+    <div class="sidebar-resizer" id="sidebar-resizer" role="separator" aria-orientation="vertical"
+      aria-label="Resize sidebar" tabindex="0"></div>
 
     <!-- Right Main Chat Area -->
     <main class="chat-container">
@@ -52,7 +54,7 @@
          --><span class="s-green">s</span>
           </h1>
 
-          <img src="images/cloud-logo.png" class="logo-cloud" alt="Google Cloud">
+          <img src="CloudComms_Icon.svg" class="logo-cloud" alt="Cloud Comms">
     </div>
     <div class="subtext-under-logo">Stay updated in the cloud...</div>
 
@@ -118,19 +120,6 @@
         <button class="suggest-pill">Latest updates in the cloud</button>
         <button class="suggest-pill">Show today's service announcements</button>
       </div>
-    </div>
-  </section>
-
-  <!-- View: Recommendations -->
-  <section class="view view-recs" id="view-recs">
-    <div class="recs-header">
-      <h2 class="recs-title">Product Update Frequency</h2>
-      <p class="subtext-under-logo">Visualization of GCP products requested most frequently by users</p>
-    </div>
-
-    <div class="chart-card">
-      <canvas id="recsChart"></canvas>
-      <p class="chart-empty" id="chart-empty" style="display:none;"></p>
     </div>
   </section>
 

@@ -189,7 +189,7 @@ GLOBAL_CSS = """<style>
       color: var(--pulse-on-surface);
       letter-spacing: -0.2px;
   }
-  .pulse-appbar p { font-family: "Roboto", sans-serif; font-size: 12px; margin: 2px 0 0 0; color: var(--pulse-on-surface-variant); }
+  .pulse-appbar p { font-family: "Roboto", sans-serif; font-size: 13px; font-weight: 500; margin: 2px 0 0 0; color: var(--pulse-on-surface); }
 
   /* ── Cards / containers (tonal elevation, not shadow) ────────────── */
   .pulse-card {
